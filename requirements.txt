@@ -1,0 +1,4 @@
+# Pin CPU-only TensorFlow to avoid unnecessary GPU drivers in CI
+tensorflow-cpu==2.16.*
+numpy
+joblib

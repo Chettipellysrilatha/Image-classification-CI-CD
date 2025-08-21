@@ -1,0 +1,33 @@
+name: MNIST Classifier Docker CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: docker build -t mnist-classifier:latest .
+
+      - name: Train model in container (persist outputs to workspace)
+        run: docker run --rm -v ${{ github.workspace }}:/app mnist-classifier:latest
+
+      - name: Evaluate model in container
+        run: docker run --rm -v ${{ github.workspace }}:/app mnist-classifier:latest python evaluate_mnist.py
+
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mnist_model
+          path: mnist_model
+          if-no-files-found: error
